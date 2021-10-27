@@ -19,13 +19,20 @@ const main = async () => {
   let txn;
   // We only have three characters.
   // an NFT w/ the character at index 2 of our array.
-  txn = await gameContract.mintCharacterNFT(2);
+  txn = await gameContract.mintCharacterNFT(1);
   await txn.wait();
 
   txn = await gameContract.attackBoss();
   await txn.wait();
 
-  txn = await gameContract.attackBoss();
+  // txn = await gameContract.attackBoss();
+  // await txn.wait();
+
+  let overrides = {
+    // To convert Ether to Wei:
+    value: ethers.utils.parseEther(".005"), // ether in this case MUST be a string
+  };
+  txn = await gameContract.revivePlayerNFT(overrides);
   await txn.wait();
   // Get the value of the NFT's URI.
   let returnedTokenUri = await gameContract.tokenURI(1);

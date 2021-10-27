@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { CONTRACT_ADDRESS, transformCharacterData } from "../../constants";
 import myEpicGame from "../../utils/MyEpicGame.json";
 import LoadingIndicator from "../LoadingIndicator";
+import ImageWithLoadingIndicator from "../ImageWithLoadingIndicator/ImageWithLoadingIndicator";
 
 /*
  * Don't worry about setCharacterNFT just yet, we will talk about it soon!
@@ -126,7 +127,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         <div className="name-container">
           <p>{character.name}</p>
         </div>
-        <img
+        <ImageWithLoadingIndicator
           src={`https://cloudflare-ipfs.com/ipfs/${character.imageURI}`}
           alt={character.name}
         />

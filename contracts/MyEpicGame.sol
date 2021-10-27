@@ -40,6 +40,7 @@ contract MyEpicGame is ERC721 {
 
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
   event AttackComplete(uint newBossHp, uint newPlayerHp);
+  event PlayerRevived(uint newPlayerHP);
 
 struct BigBoss {
   string name;
@@ -97,6 +98,18 @@ BigBoss public bigBoss;
     // I increment tokenIds here so that my first NFT has an ID of 1.
     // More on this in the lesson!
     _tokenIds.increment();
+  }
+
+  function revivePlayerNFT() public payable{
+      uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+      CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
+      require (
+      player.hp == 0,
+      "Error: character must be ded.");
+      require(msg.value == .005 ether, 'Revival costs .005 ether');
+      player.hp = player.maxHp;
+      console.log("nftPlayerToken %s revived", nftTokenIdOfPlayer);
+      emit PlayerRevived(player.hp);
   }
 
   function attackBoss() public {

@@ -4,6 +4,7 @@ import { CONTRACT_ADDRESS, transformCharacterData } from "../../constants";
 import myEpicGame from "../../utils/MyEpicGame.json";
 import "./Arena.css";
 import LoadingIndicator from "../LoadingIndicator";
+import ImageWithLoadingIndicator from "../ImageWithLoadingIndicator/ImageWithLoadingIndicator";
 
 /*
  * We pass in our characterNFT metadata so we can a cool card in our UI
@@ -96,6 +97,29 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   };
 
+  const revivePlayerNFT = async () => {
+    try {
+      if (gameContract) {
+        console.log("Attempt revive Character");
+        const reviveTxn = await gameContract.revivePlayerNFT({
+          value: ethers.utils.parseEther(".005"),
+        });
+        gameContract.on("PlayerRevived", (newPlayerHP) => {
+          console.log("Player revived");
+
+          setCharacterNFT((prevState) => {
+            let playerHP = newPlayerHP.toNumber();
+            return { ...prevState, hp: playerHP };
+          });
+
+          gameContract.off("PlayerRevived");
+        });
+      }
+    } catch (error) {
+      console.error("Error reviving character", error);
+    }
+  };
+
   return (
     <div className="arena-container">
       {showToast && (
@@ -109,10 +133,14 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           <div className={`boss-content ${attackState}`}>
             <h2>🔥 {boss.name} 🔥</h2>
             <div className="image-content">
-              <img
+              <ImageWithLoadingIndicator
                 src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`}
                 alt={`Boss ${boss.name}`}
               />
+              {/* <img
+                src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`}
+                alt={`Boss ${boss.name}`}
+              /> */}
               <div className="health-bar">
                 <progress value={boss.hp} max={boss.maxHp} />
                 <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
@@ -141,7 +169,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
             <div className="player">
               <div className="image-content">
                 <h2>{characterNFT.name}</h2>
-                <img
+                <ImageWithLoadingIndicator
                   src={`https://cloudflare-ipfs.com/ipfs/${characterNFT.imageURI}`}
                   alt={`Character ${characterNFT.name}`}
                 />
@@ -154,6 +182,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
               </div>
             </div>
+            {characterNFT.hp == 0 && (
+              <button className="reviveButton" onClick={revivePlayerNFT}>
+                {`Revive Character: 0.005 Eth`}
+              </button>
+            )}
           </div>
         </div>
       )}
