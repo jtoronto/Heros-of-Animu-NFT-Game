@@ -10,6 +10,7 @@ import "./libraries/Base64.sol";
 import "hardhat/console.sol";
 
 contract MyEpicGame is ERC721 {
+
   // We'll hold our character's attributes in a struct. Feel free to add
   // whatever you'd like as an attribute! (ex. defense, crit chance, etc).
   struct CharacterAttributes {
@@ -21,6 +22,8 @@ contract MyEpicGame is ERC721 {
     uint attackDamage;
   }
   
+  uint256 healthPricePerUnit = 1000000 gwei;
+
   // The tokenId is the NFTs unique identifier, it's just a number that goes
   // 0, 1, 2, 3, etc.
   using Counters for Counters.Counter;
@@ -41,6 +44,7 @@ contract MyEpicGame is ERC721 {
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
   event AttackComplete(uint newBossHp, uint newPlayerHp);
   event PlayerRevived(uint newPlayerHP);
+  event HealthBoosted(uint newPlayerHP);
 
 struct BigBoss {
   string name;
@@ -110,6 +114,48 @@ BigBoss public bigBoss;
       player.hp = player.maxHp;
       console.log("nftPlayerToken %s revived", nftTokenIdOfPlayer);
       emit PlayerRevived(player.hp);
+  }
+
+  function purchaseHealth(uint256 amount) public payable{
+    uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+      CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
+      require (
+      player.hp < player.maxHp,
+      "Error: character must not be already at full health");
+      uint256 hpAfterBoost = amount + player.hp;
+      require(player.hp > 0, "Error: character is ded. Health isn't going to help");
+      if (hpAfterBoost > player.maxHp){
+        //Require correct amount was sent
+        uint256 requiredFundsThisTransaction = healthPricePerUnit * amount;
+        console.log("%s required for this transaction", requiredFundsThisTransaction);
+        require(msg.value >= requiredFundsThisTransaction, 'Insufficient funds sent');
+        
+        //Calculate overage
+        uint256 overage = hpAfterBoost - player.maxHp;
+        console.log("Whoops, you kinda overshot there guy by about %s", overage);
+        uint256 change = overage * healthPricePerUnit;
+        console.log("Calculated change to give back %s", change);
+        //Set hp to max
+        player.hp = player.maxHp;
+        //Emit event
+        emit HealthBoosted(player.hp);
+        //Return change
+        (bool success, ) = msg.sender.call{value: change}('');
+        require(success, "Returning change failed.");
+
+      }else if (hpAfterBoost <= player.maxHp){
+        //Require correct amount was sent
+          uint256 requiredFundsThisTransaction = healthPricePerUnit * amount;
+          console.log("%s required for this transaction", requiredFundsThisTransaction);
+          require(msg.value >= requiredFundsThisTransaction, 'Insufficient funds sent');
+
+        //set hp 
+          player.hp += amount;
+        //Emit event
+          emit HealthBoosted(player.hp);
+
+      }
+      
   }
 
   function attackBoss() public {
