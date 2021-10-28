@@ -1,5 +1,5 @@
 //const CONTRACT_ADDRESS = "0xCc90ce8AB3d4F8905164D3b256e259A039D9CFBd"; //Rinkeby
-const CONTRACT_ADDRESS = "0xe0645f828401eF68696371e682F9254EA3988b91"; //Ganache
+const CONTRACT_ADDRESS = "0x79aA699a689Ec199999E31ad77A75c0aD2f099e9"; //Ganache
 
 const transformCharacterData = (characterData) => {
   return {
