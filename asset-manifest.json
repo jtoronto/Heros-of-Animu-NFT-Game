@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/Heros-of-Animu-NFT-Game/static/css/main.510bb481.chunk.css",
+    "main.js": "/Heros-of-Animu-NFT-Game/static/js/main.ed086ff4.chunk.js",
+    "main.js.map": "/Heros-of-Animu-NFT-Game/static/js/main.ed086ff4.chunk.js.map",
+    "runtime-main.js": "/Heros-of-Animu-NFT-Game/static/js/runtime-main.6ff88ad3.js",
+    "runtime-main.js.map": "/Heros-of-Animu-NFT-Game/static/js/runtime-main.6ff88ad3.js.map",
+    "static/js/2.c81eab7c.chunk.js": "/Heros-of-Animu-NFT-Game/static/js/2.c81eab7c.chunk.js",
+    "static/js/2.c81eab7c.chunk.js.map": "/Heros-of-Animu-NFT-Game/static/js/2.c81eab7c.chunk.js.map",
+    "index.html": "/Heros-of-Animu-NFT-Game/index.html",
+    "static/css/main.510bb481.chunk.css.map": "/Heros-of-Animu-NFT-Game/static/css/main.510bb481.chunk.css.map",
+    "static/js/2.c81eab7c.chunk.js.LICENSE.txt": "/Heros-of-Animu-NFT-Game/static/js/2.c81eab7c.chunk.js.LICENSE.txt",
+    "static/media/Rilakkuma-Yosha.4d8c0af0.gif": "/Heros-of-Animu-NFT-Game/static/media/Rilakkuma-Yosha.4d8c0af0.gif",
+    "static/media/twitter-logo.a8a75254.svg": "/Heros-of-Animu-NFT-Game/static/media/twitter-logo.a8a75254.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6ff88ad3.js",
+    "static/js/2.c81eab7c.chunk.js",
+    "static/css/main.510bb481.chunk.css",
+    "static/js/main.ed086ff4.chunk.js"
+  ]
+}
