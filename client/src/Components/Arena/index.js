@@ -5,7 +5,6 @@ import myEpicGame from "../../utils/MyEpicGame.json";
 import "./Arena.css";
 import LoadingIndicator from "../LoadingIndicator";
 import ImageWithLoadingIndicator from "../ImageWithLoadingIndicator/ImageWithLoadingIndicator";
-import { use } from "chai";
 
 /*
  * We pass in our characterNFT metadata so we can a cool card in our UI
@@ -59,7 +58,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       const playerHp = newPlayerHp.toNumber();
 
       console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`);
-
+      if (gameContract) {
+        gameContract.off("CriticalHit");
+      }
       /*
        * Update both player and boss Hp
        */
@@ -98,11 +99,14 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       if (gameContract) {
         setAttackState("attacking");
         console.log("Attacking boss...");
+        gameContract.on("CriticalHit", () => {
+          popToast("Critical hit 2x dmg!");
+        });
         const attackTxn = await gameContract.attackBoss();
         await attackTxn.wait();
+        popToast(`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`);
         console.log("attackTxn:", attackTxn);
         setAttackState("hit");
-        popToast(`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`);
       }
     } catch (error) {
       console.error("Error attacking boss:", error);
@@ -230,15 +234,16 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               </div>
               <div className="stats">
                 <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
+                <h4>{`⚔️ Critical Hit Rate: ${characterNFT.criticalRate}`}</h4>
               </div>
             </div>
             <div className="healthBoostButtonDiv">
-              {characterNFT.hp == 0 && (
+              {characterNFT.hp === 0 && (
                 <button className="reviveButton" onClick={revivePlayerNFT}>
                   {`Revive Character: 0.005 Eth`}
                 </button>
               )}
-              {characterNFT.hp < characterNFT.maxHp && characterNFT.hp != 0 && (
+              {characterNFT.hp < characterNFT.maxHp && characterNFT.hp !== 0 && (
                 <React.Fragment>
                   <button
                     className="healthBoostButton"

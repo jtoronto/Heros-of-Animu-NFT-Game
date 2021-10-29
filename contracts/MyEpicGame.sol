@@ -20,10 +20,19 @@ contract MyEpicGame is ERC721 {
     uint hp;
     uint maxHp;
     uint attackDamage;
+    uint criticalRate;
   }
-  
-  uint256 healthPricePerUnit = 1000000 gwei;
+  struct BigBoss {
+    string name;
+    string imageURI;
+    uint hp;
+    uint maxHp;
+    uint attackDamage;
+    uint criticalRate;
 
+  }
+  uint256 healthPricePerUnit = 1000000 gwei;
+  BigBoss public bigBoss;
   // The tokenId is the NFTs unique identifier, it's just a number that goes
   // 0, 1, 2, 3, etc.
   using Counters for Counters.Counter;
@@ -45,16 +54,11 @@ contract MyEpicGame is ERC721 {
   event AttackComplete(uint newBossHp, uint newPlayerHp);
   event PlayerRevived(uint newPlayerHP);
   event HealthBoosted(uint newPlayerHP);
+  event CriticalHit(uint critHitAmount);
 
-struct BigBoss {
-  string name;
-  string imageURI;
-  uint hp;
-  uint maxHp;
-  uint attackDamage;
-}
 
-BigBoss public bigBoss;
+
+
 
   // Data passed in to the contract when it's first created initializing the characters.
   // We're going to actually pass these values in from from run.js.
@@ -63,10 +67,12 @@ BigBoss public bigBoss;
     string[] memory characterImageURIs,
     uint[] memory characterHp,
     uint[] memory characterAttackDmg,
+    uint[] memory characterCriticalRate,
     string memory bossName, // These new variables would be passed in via run.js or deploy.js.
     string memory bossImageURI,
     uint bossHp,
-    uint bossAttackDamage
+    uint bossAttackDamage,
+    uint bossCriticalRate
   )   
     ERC721("Heros of Animu", "ANIMUS")
 
@@ -77,7 +83,8 @@ BigBoss public bigBoss;
       imageURI: bossImageURI,
       hp: bossHp,
       maxHp: bossHp,
-      attackDamage: bossAttackDamage
+      attackDamage: bossAttackDamage,
+      criticalRate: bossCriticalRate
     });
 
   console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
@@ -92,7 +99,8 @@ BigBoss public bigBoss;
         imageURI: characterImageURIs[i],
         hp: characterHp[i],
         maxHp: characterHp[i],
-        attackDamage: characterAttackDmg[i]
+        attackDamage: characterAttackDmg[i],
+        criticalRate: characterCriticalRate[i]
       }));
 
       CharacterAttributes memory c = defaultCharacters[i];
@@ -158,12 +166,33 @@ BigBoss public bigBoss;
       
   }
 
+  function calculateCrit(uint critRate) internal view returns (bool){
+    uint randomnumber = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, block.difficulty))) % 255;
+    console.log("Random number for crit %s", randomnumber);
+    bool returnValue = false;
+    if (randomnumber <= critRate){
+      console.log("Critical hit achieved");
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
   function attackBoss() public {
   // Get the state of the player's NFT.
   uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
   CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
   console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
   console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+  
+  uint256 characterAttackDamage = player.attackDamage;
+  require(player.criticalRate <= 255, "Crit rate out of bounds");
+  
+  if (calculateCrit(player.criticalRate) == true){
+    
+    characterAttackDamage = characterAttackDamage * 2;
+    emit CriticalHit(characterAttackDamage);
+  }
+
 
   // Make sure the player has more than 0 HP.
   require (
@@ -184,10 +213,15 @@ BigBoss public bigBoss;
     bigBoss.hp = bigBoss.hp - player.attackDamage;
   }
    // Allow boss to attack player.
-  if (player.hp < bigBoss.attackDamage) {
+   uint256 bossAttackDamage = bigBoss.attackDamage;
+   if (calculateCrit(bigBoss.criticalRate) == true){
+    bossAttackDamage = bossAttackDamage * 2;
+    emit CriticalHit(bossAttackDamage);
+  }
+  if (player.hp < bossAttackDamage) {
     player.hp = 0;
   } else {
-    player.hp = player.hp - bigBoss.attackDamage;
+    player.hp = player.hp - bossAttackDamage;
   }
    // Console for ease.
   console.log("Boss attacked player. New player hp: %s\n", player.hp);
@@ -212,7 +246,8 @@ BigBoss public bigBoss;
       imageURI: defaultCharacters[_characterIndex].imageURI,
       hp: defaultCharacters[_characterIndex].hp,
       maxHp: defaultCharacters[_characterIndex].hp,
-      attackDamage: defaultCharacters[_characterIndex].attackDamage
+      attackDamage: defaultCharacters[_characterIndex].attackDamage,
+      criticalRate: defaultCharacters[_characterIndex].criticalRate
     });
 
     console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);

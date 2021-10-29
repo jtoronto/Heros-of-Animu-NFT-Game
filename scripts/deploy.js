@@ -9,10 +9,12 @@ const main = async () => {
     ],
     [100, 75, 300], // HP values
     [50, 25, 478], // Attack damage values
+    [125, 200, 75], //Character crit rates 0-255
     "Orochimaru", //Boss name
     "QmW59w63AAZCeYScFTxc6Mt48bc8m379rzmBhyMgYtzQwi", //Boss image
-    10000, //Boss HP
-    50 //Boss attack damage
+    5000, //Boss HP
+    50, //Boss attack damage
+    0 //Boss crit
   );
   await gameContract.deployed();
   console.log("Contract deployed to:", gameContract.address);
